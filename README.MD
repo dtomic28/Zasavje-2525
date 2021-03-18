@@ -1,8 +1,8 @@
-Mechanics:
--jump
--run
--walk
--dash
+## Mechanics:
+-jump\
+-run\
+-walk\
+-dash\
 
 Platforms:
 -Stone(special)
