@@ -1,3 +1,5 @@
+# Zasavje 2525
+
 ## Mechanics:
 -jump\
 -run\
@@ -6,7 +8,7 @@
 
 ## Platforms:
 -Stone(special)\
--Wood\
+-Wood
 
 
 ## Maps:
@@ -39,7 +41,7 @@
 -rjavi premog(medium)\
 -črni premog(high)\
 -100 legnit=1 rjav premog\
-10 rjavih premogov= 1 črn premog\
+10 rjavih premogov= 1 črn premog
 
 ## star/heart system:
 -1-3 stars per lvl\
@@ -56,7 +58,7 @@
 	Short Buff\
 	*
 -Heart shop\
-	Extra health\
+	Extra health
 	
 -Star shop:\
 	Extra damage
