@@ -15,6 +15,7 @@
 -Zagorje\
 -Hrastnik\
 -Trbovlje
+-litija
 
 ## Nasprotniki:
 -[normal] padli rudarji(zombiji)\
@@ -23,7 +24,7 @@
 -[direct attack] cart pusher (vozijo enosmerno)\
 -[malee tank] chubby rudarji
 
-## Diniboss/final boss
+## Miniboss/final boss
 -vodja za\
 -vodja hr\
 -vodja tr\
@@ -32,7 +33,7 @@
 ## Difficult level:
 -easy\
 -normal\
--hard\
+-hard
 
 -INSANE MODE(easter egg)
 
