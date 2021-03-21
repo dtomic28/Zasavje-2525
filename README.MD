@@ -69,6 +69,18 @@
 -Custom hp\
 -Custom damage
 
+## Zgodba
+
+Glavni karakter je potomec zasavja. Raziskoval je svojo zgodovino in ugotovil, da je v zasavju zapuščeno nekaj kar si on želi. Raziskuje vsa mesta zasavja in išče grob svojega 15x pra dedka. Živi v modernem mestu Ljubljana. Njegova pot do groba nebo lahka, saj je Trbovlje obkoljeno z pokojnimi rudarji, ki so oživeli iz grobov. Začne na Izlakah, kjer potem pojde proti Zagorju, iz Zagorja, v Trbovlje, iz Trbovelj v Hrasnik in potem dobi priložnost oz. odklene glavni boss fight, ki bo na dimniku tet, ki še vedno stoji. Dimnik bo totalno urejen, bil bo kot nek dom/tempel. Glavni boss je perkmandlc, ki ščiti grob njegovega pra dedka. 
+
+## Glavni junak
+
+Janez Drnovšek je glavni junak ki išče svojega starega pradedka Andreasa Drnovška in njegov »zaklad«. Janez je star 180 let, ki se pretvori v 18 let v današnjih dneh. Seveda zdravje do takrat se je zelo poboljšalo zato, so dosegli 1000 letno življensko dobo. Karakter bi imel podobno podobo kot junaki iz filma TRON. 
+
+## Tematika
+
+Uporabljal se bo stil vaporwave z kombinacijo starinjskega izgleda 
+
 
 	
 
