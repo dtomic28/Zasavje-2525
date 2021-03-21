@@ -15,7 +15,6 @@
 -Zagorje\
 -Hrastnik\
 -Trbovlje
--litija
 
 ## Nasprotniki:
 -[normal] padli rudarji(zombiji)\
