@@ -71,7 +71,7 @@ player_action = 'idle'
 player_frame = 0
 player_flip = False
 
-player_rect = pygame.Rect(100,100,48,96)
+player_rect = pygame.Rect(100,100,5,13)
 
 background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
 
@@ -107,8 +107,7 @@ def move(rect,movement,tiles):
 while True: # game loop
     display.fill((146,244,255)) # clear screen by filling it with blue
 
-    scroll[0] += (player_rect.x-scroll[0] - (500+16))/20
-    scroll[1] += (player_rect.y - scroll[1] - (200 + 16)) / 30
+    scroll[0] += (player_rect.x-scroll[0] - (150+16))/20
 
     pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
     for background_object in background_objects:
@@ -124,23 +123,23 @@ while True: # game loop
         x = 0
         for tile in layer:
             if tile == '1':
-                display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1]))
+                display.blit(dirt_img,(x*16-scroll[0],y*16-scroll[1]))
             if tile == '2':
-                display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1]))
+                display.blit(grass_img,(x*16-scroll[0],y*16-scroll[1]))
             if tile != '0':
-                tile_rects.append(pygame.Rect(x*64,y*64,64,64))
+                tile_rects.append(pygame.Rect(x*16,y*16,16,16))
             x += 1
         y += 1
 
     player_movement = [0,0]
     if moving_right == True:
-        player_movement[0] += 5
+        player_movement[0] += 2
     if moving_left == True:
-        player_movement[0] -= 5
+        player_movement[0] -= 2
     player_movement[1] += vertical_momentum
-    vertical_momentum += 0.5
-    if vertical_momentum > 7:
-        vertical_momentum = 7
+    vertical_momentum += 0.2
+    if vertical_momentum > 3:
+        vertical_momentum = 3
 
     if player_movement[0] == 0:
         player_action,player_frame = change_action(player_action,player_frame,'idle')
@@ -177,7 +176,7 @@ while True: # game loop
                 moving_left = True
             if event.key == K_UP:
                 if air_timer < 6:
-                    vertical_momentum = -15
+                    vertical_momentum = -5
 
         if event.type == KEYUP:
             if event.key == K_RIGHT:
