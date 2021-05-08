@@ -115,8 +115,16 @@ NOTE: če tuki daš unused rudarja se naredi bug, k randomly floata
 """
 
 rudar_sez=[]
+#rudar1 = rudar(2000,50,48,96,"rudar_walk",0,False,0,0,True)
+rudar2 = rudar(600,350,48,96,"rudar_walk",0,False,0,0,True)
+#rudar_sez.append(rudar1)
+rudar_sez.append(rudar2)
+
 lučkar_sez=[]
-load_map_timer = 0
+#lučkar1 = lučkar(2000,50,48,96,"lučkar_walk",0,False,0,0,True)
+lučkar2 = lučkar(300,350,48,96,"lučkar_walk",0,False,0,0,True,180,0)
+#lučkar_sez.append(lučkar1)
+lučkar_sez.append(lučkar2)
 
 def collision_test(rect,tiles):
     hit_list = []
@@ -150,7 +158,7 @@ def move(rect,movement,tiles):
 
 
 def main():
-    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer
+    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip
 
     while True: # game loop
         display.fill((76,0,150)) # clear screen by filling it with blue
@@ -163,18 +171,10 @@ def main():
                     display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1]))
                 if tile == '2':
                     display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1]))
-                if tile != '0' and tile != "l" and tile != "r":
+                if tile != '0':
                     tile_rects.append(pygame.Rect(x*64,y*64,64,64))
-                if load_map_timer == 0:
-                    if tile == "l":
-                        lučkar1 = lučkar(x * 64, y * 64, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0)
-                        lučkar_sez.append(lučkar1)
-                    if tile == "r":
-                        rudar1 = rudar(x * 64, y * 64, 48, 96, "rudar_walk", 0, False, 0, 0, True)
-                        rudar_sez.append(rudar1)
                 x += 1
             y += 1
-        load_map_timer = 1
 
         scroll[0] += (player_rect.x-scroll[0] - (500+16))/20
         scroll[1] += (player_rect.y - scroll[1] - (200 + 16)) / 30
