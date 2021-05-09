@@ -49,20 +49,6 @@ class lučkar():
         self.lučkar_wait_timer = lučkar_wait_timer
         self.lučkar_attack_timer = lučkar_attack_timer
 
-class tank():
-    def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive,tank_hp):
-        self.tank_x_pos = tank_x_pos
-        self.tank_y_pos = tank_y_pos
-        self.tank_width = tank_width
-        self.tank_height = tank_height
-        self.tank_action = tank_action
-        self.tank_frame = tank_frame
-        self.tank_flip = tank_flip
-        self.tank_movement_x = tank_movement_x
-        self.tank_movement_y = tank_movement_y
-        self.tank_alive = tank_alive
-        self.tank_hp = tank_hp
-
 def load_map(path):
     f = open("game/"+path + '.txt','r')
     data = f.read()
@@ -107,7 +93,6 @@ animation_database['rudar_walk'] = load_animation('game/assets/characters/rudar/
 animation_database['rudar_attack'] = load_animation('game/assets/characters/rudar/rudar_attack', [0, 1, 2, 3])
 animation_database["lučkar_walk"] = load_animation('game/assets/characters/lučkar/lučkar_walk', [0, 1, 2,3,4,5,6,7])
 animation_database["lučkar_attack"] = load_animation('game/assets/characters/lučkar/lučkar_attack', [0, 1, 2,3,4,5,6,7,8,9,10])
-animation_database["tank_walk"] = load_animation('game/assets/characters/tank/tank_walk', [0, 1, 2,3,4,5,6,7,8,9,10,11])
 
 game_map = load_map('map')
 
@@ -131,7 +116,6 @@ NOTE: če tuki daš unused rudarja se naredi bug, k randomly floata
 
 rudar_sez=[]
 lučkar_sez=[]
-tank_sez=[]
 load_map_timer = 0
 
 def collision_test(rect,tiles):
@@ -179,18 +163,15 @@ def main():
                     display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1]))
                 if tile == '2':
                     display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1]))
-                if tile != '0' and tile != "l" and tile != "r" and tile != "t":
+                if tile != '0' and tile != "l" and tile != "r":
                     tile_rects.append(pygame.Rect(x*64,y*64,64,64))
                 if load_map_timer == 0:
                     if tile == "l":
-                        lučkar1 = lučkar(x * 64-32, y * 64-32, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0)
+                        lučkar1 = lučkar(x * 64, y * 64, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0)
                         lučkar_sez.append(lučkar1)
                     if tile == "r":
-                        rudar1 = rudar(x * 64-32, y * 64-32, 48, 96, "rudar_walk", 0, False, 0, 0, True)
+                        rudar1 = rudar(x * 64, y * 64, 48, 96, "rudar_walk", 0, False, 0, 0, True)
                         rudar_sez.append(rudar1)
-                    if tile == "t":
-                        tank1 = tank(x * 64-32, y * 64-32, 54, 96, "tank_walk", 0, False, 0, 0, True,3)
-                        tank_sez.append(tank1)
                 x += 1
             y += 1
         load_map_timer = 1
@@ -234,7 +215,7 @@ def main():
                 display.blit(pygame.transform.flip(rudar_img, rudars.rudar_flip, False),(rudars.rudar_x_pos - scroll[0], rudars.rudar_y_pos - scroll[1]))
                 rudar_test_top_left = player_rect.collidepoint(rudar_rects.topleft)
                 rudar_test_top_right = player_rect.collidepoint(rudar_rects.topright)
-                if rudar_test_top_left == True or rudar_test_top_right == True:
+                if rudar_test_top_left == True or rudar_test_top_right:
                     rudars.rudar_alive = False
                     vertical_momentum = -15
 
@@ -285,47 +266,12 @@ def main():
                 display.blit(pygame.transform.flip(lučkar_img, lučkars.lučkar_flip, False),(lučkars.lučkar_x_pos - scroll[0], lučkars.lučkar_y_pos - scroll[1]))
                 lučkar_test_top_left = player_rect.collidepoint(lučkar_rects.topleft)
                 lučkar_test_top_right = player_rect.collidepoint(lučkar_rects.topright)
-                if lučkar_test_top_left == True or lučkar_test_top_right == True:
+                if lučkar_test_top_left == True or lučkar_test_top_right:
                     lučkars.lučkar_alive = False
                     vertical_momentum = -15
+
             else:
                 lučkar_rects=pygame.Rect(0,0,0,0)
-
-        for tanks in tank_sez:
-            if tanks.tank_alive == True:
-                tanks.tank_movement_y += 1
-                tank_rects = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,54,96)
-                if tanks.tank_x_pos > player_rect.x+50:
-                    tanks.tank_action, tanks.rudar_frame = change_action(tanks.tank_action,tanks.tank_frame, "tank_walk")
-                    tanks.tank_flip = True
-                    tanks.tank_movement_x = -0.5
-                if tanks.tank_x_pos < player_rect.x-50:
-                    tanks.tank_action, tanks.tank_frame = change_action(tanks.tank_action, tanks.tank_frame,"tank_walk")
-                    tanks.tank_flip = False
-                    tanks.tank_movement_x = 0.5
-                tank_rects, collisions = move(tank_rects, [tanks.tank_movement_x,tanks.tank_movement_y], tile_rects)
-                if collisions["bottom"] == True:
-                    tanks.tank_movement_y = 0
-                if collisions["left"] == True or collisions["right"] == True:
-                    tanks.tank_movement_x = 0
-                tanks.tank_x_pos += tanks.tank_movement_x
-                tanks.tank_y_pos += tanks.tank_movement_y
-                tanks.tank_frame += 1
-                if tanks.tank_frame >= len(animation_database[tanks.tank_action]):
-                    tanks.tank_frame = 0
-                tank_id = animation_database[tanks.tank_action][tanks.tank_frame]
-                tank_img = animation_frames[tank_id]
-                display.blit(pygame.transform.flip(tank_img, tanks.tank_flip, False),(tanks.tank_x_pos - scroll[0], tanks.tank_y_pos - scroll[1]))
-                tank_test_top_left = player_rect.collidepoint(tank_rects.topleft)
-                tank_test_top_right = player_rect.collidepoint(tank_rects.topright)
-                if tank_test_top_left == True or tank_test_top_right == True:
-                    tanks.tank_hp -= 1
-                    vertical_momentum = -15
-                if tanks.tank_hp == 0:
-                    tanks.tank_alive = False
-
-            else:
-                tank_rects=pygame.Rect(0,0,0,0)
 
         player_movement = [0,0]
         if moving_right == True:
