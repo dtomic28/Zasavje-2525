@@ -1,4 +1,4 @@
-import pygame, sys, os, random, pygame_menu
+import pygame, sys, os, random
 
 clock = pygame.time.Clock()
 
@@ -7,11 +7,11 @@ pygame.init() # initiates pygame
 
 pygame.display.set_caption('Pygame Platformer')
 
-WINDOW_SIZE = (1200,800)
+WINDOW_SIZE = (1400,800)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) # initiate the window
 
-display = pygame.Surface((1200,800)) # used as the surface for rendering, which is scaled
+display = pygame.Surface((1400,800)) # used as the surface for rendering, which is scaled
 
 player_jump = False
 moving_right = False
@@ -48,6 +48,14 @@ class lučkar():
         self.lučkar_alive =lučkar_alive
         self.lučkar_wait_timer = lučkar_wait_timer
         self.lučkar_attack_timer = lučkar_attack_timer
+
+class coin()
+    def __init__(self, x_pos,y_pos, x_size, y_size, colider):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x.size = x_size
+        self.y_size = x_size
+        self.colider = colider
 
 class tank():
     def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive,tank_hp):
@@ -113,6 +121,7 @@ game_map = load_map('map')
 
 grass_img = pygame.image.load('grass.png')
 dirt_img = pygame.image.load('dirt.png')
+coin_img = pygame.imgage.load("coin.png")
 
 player_action = 'player_idle'
 player_frame = 0
@@ -124,10 +133,6 @@ player_rect = pygame.Rect(100,100,48,96)
 
 background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
 
-"""
-NOTE: če tuki daš unused rudarja se naredi bug, k randomly floata
-
-"""
 
 rudar_sez=[]
 lučkar_sez=[]
@@ -191,6 +196,8 @@ def main():
                     if tile == "t":
                         tank1 = tank(x * 64-32, y * 64-32, 54, 96, "tank_walk", 0, False, 0, 0, True,3)
                         tank_sez.append(tank1)
+                    if tile == "c"
+                        coin1 = coiun(x*64 , y*64-32,16,16,(x*64))
                 x += 1
             y += 1
         load_map_timer = 1
@@ -334,8 +341,8 @@ def main():
             player_movement[0] -= 5
         player_movement[1] += vertical_momentum
         vertical_momentum += 0.5
-        if vertical_momentum > 7:
-            vertical_momentum = 7
+        if vertical_momentum > 100:
+            vertical_momentum = 100
 
         if player_movement[0] == 0:
             player_action,player_frame = change_action(player_action,player_frame,'player_idle')
@@ -371,7 +378,7 @@ def main():
                 if event.key == K_LEFT:
                     moving_left = True
                 if event.key == K_UP:
-                    if air_timer < 6:
+                    if air_timer < 3:
                         vertical_momentum = -15
 
             if event.type == KEYUP:
@@ -383,13 +390,15 @@ def main():
         #test+=1
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(60)         
 
-menu = pygame_menu.Menu(800, 1200, 'Welcome',
-                       theme=pygame_menu.themes.THEME_BLUE)
+""" menu = pygame_menu.Menu(800, 100, 'Zasavje 2525: Maščevanje Janeza',
+                       theme=pygame_menu.themes.THEME_DARK)
 
-menu.add.text_input('Name :', default='John Doe')
-menu.add.button('Play', main)
-menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.add.text_input('Ime :', default='Janez Novak')
+menu.add.button('Igraj', main)
+menu.add.button('Izhod', pygame_menu.events.EXIT)
 
-menu.mainloop(screen)
+menu.mainloop(screen) """
+
+main()
