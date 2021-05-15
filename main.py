@@ -1,4 +1,4 @@
-import pygame, sys, os, random, pygame_menu
+import pygame, sys, os, random
 
 clock = pygame.time.Clock()
 
@@ -17,6 +17,7 @@ player_jump = False
 moving_right = False
 moving_left = False
 vertical_momentum = 0
+player_score = 0
 air_timer = 0
 
 scroll = [0,0]
@@ -58,6 +59,15 @@ class lučkar():
         self.lučkar_wait_timer = lučkar_wait_timer
         self.lučkar_attack_timer = lučkar_attack_timer
 
+class coin():
+    def __init__(self, x_pos,y_pos, x_size, y_size, colider, coin_alive):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x_size = x_size
+        self.y_size = x_size
+        self.colider = colider
+        self.coin_alive = coin_alive
+
 class tank():
     def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive,tank_hp):
         self.tank_x_pos = tank_x_pos
@@ -93,7 +103,6 @@ def load_animation(path,frame_durations):
     for frame in frame_durations:
         animation_frame_id = animation_name + str(n)
         img_loc = path + '/' + animation_frame_id + '.png'
-        print(img_loc)
         animation_image = pygame.image.load(img_loc)
         animation_frames[animation_frame_id] = animation_image.copy()
         for i in range(frame):
@@ -124,22 +133,14 @@ grass_img = pygame.image.load('grass.png')
 dirt_img = pygame.image.load('dirt.png')
 coin_img = pygame.image.load("coin.png")
 
-
 player_action = 'player_idle'
 player_frame = 0
 player_flip = False
 player_score = 0
 
-#test = 0
 
 player_rect = pygame.Rect(100,100,48,96)
 
-background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
-
-"""
-NOTE: če tuki daš unused rudarja se naredi bug, k randomly floata
-
-"""
 
 rudar_sez=[]
 lučkar_sez=[]
@@ -181,7 +182,7 @@ def move(rect,movement,tiles):
 def main():
     global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez
 
-    while True: # game loop
+    while(1): # game loop
         display.fill((76,0,150)) # clear screen by filling it with blue
         y = 0
         for layer in game_map:
@@ -354,15 +355,14 @@ def main():
                     if tanks.tank_hp == 0:
                         tanks.tank_alive = False
 
-        player_movement = [0,0]
         if moving_right == True:
             player_movement[0] += 5
         if moving_left == True:
             player_movement[0] -= 5
         player_movement[1] += vertical_momentum
         vertical_momentum += 0.5
-        if vertical_momentum > 7:
-            vertical_momentum = 7
+        if vertical_momentum > 100:
+            vertical_momentum = 100
 
         if player_movement[0] == 0:
             player_action,player_frame = change_action(player_action,player_frame,'player_idle')
@@ -398,7 +398,7 @@ def main():
                 if event.key == K_LEFT:
                     moving_left = True
                 if event.key == K_UP:
-                    if air_timer < 6:
+                    if air_timer < 3:
                         vertical_momentum = -15
 
             if event.type == KEYUP:
@@ -410,13 +410,15 @@ def main():
         #test+=1
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(60)         
 
-menu = pygame_menu.Menu(800, 1200, 'Welcome',
-                       theme=pygame_menu.themes.THEME_BLUE)
+""" menu = pygame_menu.Menu(800, 100, 'Zasavje 2525: Maščevanje Janeza',
+                       theme=pygame_menu.themes.THEME_DARK)
 
-menu.add.text_input('Name :', default='John Doe')
-menu.add.button('Play', main)
-menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.add.text_input('Ime :', default='Janez Novak')
+menu.add.button('Igraj', main)
+menu.add.button('Izhod', pygame_menu.events.EXIT)
 
-menu.mainloop(screen)
+menu.mainloop(screen) """
+
+main()
