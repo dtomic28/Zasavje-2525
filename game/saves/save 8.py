@@ -1,4 +1,4 @@
-import pygame, sys, os, random, pygame_menu
+import pygame, sys, os, random
 
 clock = pygame.time.Clock()
 
@@ -17,6 +17,7 @@ player_jump = False
 moving_right = False
 moving_left = False
 vertical_momentum = 0
+player_score = 0
 air_timer = 0
 
 scroll = [0,0]
@@ -58,6 +59,15 @@ class lučkar():
         self.lučkar_wait_timer = lučkar_wait_timer
         self.lučkar_attack_timer = lučkar_attack_timer
 
+class coin():
+    def __init__(self, x_pos,y_pos, x_size, y_size, colider, coin_alive):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x_size = x_size
+        self.y_size = x_size
+        self.colider = colider
+        self.coin_alive = coin_alive
+
 class tank():
     def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive,tank_hp):
         self.tank_x_pos = tank_x_pos
@@ -72,12 +82,6 @@ class tank():
         self.tank_alive = tank_alive
         self.tank_hp = tank_hp
 
-class jump_pad():
-    def __init__(self,jump_pad_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
-        self.jump_pad_x_pos = jump_pad_x_pos
-        self.jump_pad_y_pos = jump_pad_y_pos
-        self.jump_pad_rect = jump_pad_rect
-        self.jump_pad_cd = jump_pad_cd
 def load_map(path):
     f = open("game/"+path + '.txt','r')
     data = f.read()
@@ -99,7 +103,6 @@ def load_animation(path,frame_durations):
     for frame in frame_durations:
         animation_frame_id = animation_name + str(n)
         img_loc = path + '/' + animation_frame_id + '.png'
-        print(img_loc)
         animation_image = pygame.image.load(img_loc)
         animation_frames[animation_frame_id] = animation_image.copy()
         for i in range(frame):
@@ -129,32 +132,21 @@ game_map = load_map('map')
 grass_img = pygame.image.load('grass.png')
 dirt_img = pygame.image.load('dirt.png')
 coin_img = pygame.image.load("coin.png")
-jump_pad_img = pygame.image.load("jump_pad.png")
-
 
 player_action = 'player_idle'
 player_frame = 0
 player_flip = False
 player_score = 0
-player_final_score = 0
 
-#test = 0
 
 player_rect = pygame.Rect(100,100,48,96)
 
-background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
-
-"""
-NOTE: če tuki daš unused rudarja se naredi bug, k randomly floata
-
-"""
 
 rudar_sez=[]
 lučkar_sez=[]
 tank_sez=[]
 tile_rects = []
 coin_sez = []
-jump_pad_sez = []
 load_map_timer = 0
 
 def collision_test(rect,tiles):
@@ -186,14 +178,13 @@ def move(rect,movement,tiles):
             collision_types['top'] = True
     return rect, collision_types
 
-def main():
-    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez
 
-    while True: # game loop
+def main():
+    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez
+
+    while(1): # game loop
         display.fill((76,0,150)) # clear screen by filling it with blue
         y = 0
-        scroll[0] += (player_rect.x-scroll[0] - (500+16))/20
-        scroll[1] = -200
         for layer in game_map:
             x = 0
             if player_rect.y+800 > y*64:
@@ -217,26 +208,15 @@ def main():
                             tank1 = tank(x * 64-32, y * 64-32, 54, 96, "tank_walk", 0, False, 0, 0, True,3)
                             tank_sez.append(tank1)
                         if tile == "c":
-                            coin1 = coin(x * 64, y * 64 - 32, 16, 16, (x * 64-16, y * 64 - 32, 16, 16), True)
+                            coin1 = coin(x * 64, y * 64 - 32, 16, 16, (x * 64, y * 64 - 32, 16, 16), True)
                             coin_sez.append(coin1)
-                        if tile == "j":
-                            jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
-                            jump_pad_sez.append(jump_pad1)
                     x += 1
 
             y += 1
         load_map_timer = 1
 
-
-        for jump_pads in jump_pad_sez:
-            display.blit(jump_pad_img,(jump_pads.jump_pad_x_pos - scroll[0],jump_pads.jump_pad_y_pos-scroll[1]))
-            if player_rect.colliderect(jump_pads.jump_pad_rect):
-                if jump_pads.jump_pad_cd == 0:
-                    vertical_momentum=-20
-                    jump_pads.jump_pad_cd = 60
-            if jump_pads.jump_pad_cd != 0:
-                jump_pads.jump_pad_cd -=1
-
+        scroll[0] += (player_rect.x-scroll[0] - (500+16))/20
+        scroll[1] = -200
 
         for coins in coin_sez:
             if coins.coin_alive == True:
@@ -252,7 +232,7 @@ def main():
             if rudars.rudar_alive == True:
                 rudars.rudar_movement_y += 1
                 rudar_rects = pygame.Rect(rudars.rudar_x_pos,rudars.rudar_y_pos,48,96)
-                rudar_top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)
+                top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)
                 if player_rect.x + 1200 > rudar_rects.x:
                     if rudars.rudar_x_pos > player_rect.x+50:
                         rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")
@@ -280,30 +260,20 @@ def main():
                     display.blit(pygame.transform.flip(rudar_img, rudars.rudar_flip, False),(rudars.rudar_x_pos - scroll[0], rudars.rudar_y_pos - scroll[1]))
                     rudar_test_top_left = player_rect.collidepoint(rudar_rects.topleft)
                     rudar_test_top_right = player_rect.collidepoint(rudar_rects.topright)
-                    rudar_test_left_middle = player_rect.collidepoint(rudar_top_colider.midleft)
-                    rudar_test_right_middle = player_rect.collidepoint(rudar_top_colider.midright)
+                    rudar_test_left_middle = player_rect.collidepoint(top_colider.midleft)
+                    rudar_test_right_middle = player_rect.collidepoint(top_colider.midright)
                     if rudar_test_top_left == True or rudar_test_top_right == True:
                         rudars.rudar_alive = False
-                        vertical_momentum = -15
                     if rudar_test_top_left == True and rudar_test_left_middle == True or rudar_test_top_right == True and rudar_test_right_middle == True:
                         rudars.rudar_alive = True
-                        player_rect = pygame.Rect(100,100,48,96)
-                        load_map_timer = 0
-                        rudar_sez= []
-                        lučkar_sez =[]
-                        tank_sez = []
-                        coin_sez = []
-                        jump_pad_sez = []
-                        player_score = 0
-                        tile_rects = []
                     if rudars.rudar_alive == False:
+                        vertical_momentum = -15
                         rudar_rects = pygame.Rect(0, 0, 0, 0)
 
         for lučkars in lučkar_sez:
             if lučkars.lučkar_alive == True:
                 lučkars.lučkar_movement_y += 1
                 lučkar_rects = pygame.Rect(lučkars.lučkar_x_pos,lučkars.lučkar_y_pos,48,96)
-                lučkar_top_colider = pygame.Rect(lučkars.lučkar_x_pos, lučkars.lučkar_y_pos, 48, 48)
                 if player_rect.x + 1200 > lučkar_rects.x:
                     if lučkars.lučkar_x_pos > player_rect.x+50 and lučkars.lučkar_attack_timer == 0:
                         lučkars.lučkar_action, lučkars.lučkar_frame = change_action(lučkars.lučkar_action,lučkars.lučkar_frame, "lučkar_walk")
@@ -346,30 +316,14 @@ def main():
                     display.blit(pygame.transform.flip(lučkar_img, lučkars.lučkar_flip, False),(lučkars.lučkar_x_pos - scroll[0], lučkars.lučkar_y_pos - scroll[1]))
                     lučkar_test_top_left = player_rect.collidepoint(lučkar_rects.topleft)
                     lučkar_test_top_right = player_rect.collidepoint(lučkar_rects.topright)
-                    lučkar_test_left_middle = player_rect.collidepoint(lučkar_top_colider.midleft)
-                    lučkar_test_right_middle = player_rect.collidepoint(lučkar_top_colider.midright)
                     if lučkar_test_top_left == True or lučkar_test_top_right == True:
                         lučkars.lučkar_alive = False
                         vertical_momentum = -15
-                    if lučkar_test_top_left == True and lučkar_test_left_middle == True or lučkar_test_top_right == True and lučkar_test_right_middle == True:
-                        lučkars.lučkar_alive = True
-                        player_rect = pygame.Rect(100,100,48,96)
-                        load_map_timer = 0
-                        rudar_sez= []
-                        lučkar_sez =[]
-                        tank_sez = []
-                        coin_sez = []
-                        jump_pad_sez = []
-                        player_score = 0
-                        tile_rects = []
-                    if lučkars.lučkar_alive == False:
-                        lučkar_rects = pygame.Rect(0, 0, 0, 0)
 
         for tanks in tank_sez:
             if tanks.tank_alive == True:
                 tanks.tank_movement_y += 1
                 tank_rects = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,54,96)
-                tank_top_colider = pygame.Rect(tanks.tank_x_pos, tanks.tank_y_pos, 54, 48)
                 if player_rect.x + 1200 > tank_rects.x:
                     if tanks.tank_x_pos > player_rect.x+50:
                         tanks.tank_action, tanks.rudar_frame = change_action(tanks.tank_action,tanks.tank_frame, "tank_walk")
@@ -395,25 +349,12 @@ def main():
                     display.blit(pygame.transform.flip(tank_img, tanks.tank_flip, False),(tanks.tank_x_pos - scroll[0], tanks.tank_y_pos - scroll[1]))
                     tank_test_top_left = player_rect.collidepoint(tank_rects.topleft)
                     tank_test_top_right = player_rect.collidepoint(tank_rects.topright)
-                    tank_test_left_middle = player_rect.collidepoint(tank_top_colider.midleft)
-                    tank_test_right_middle = player_rect.collidepoint(tank_top_colider.midright)
                     if tank_test_top_left == True or tank_test_top_right == True:
                         tanks.tank_hp -= 1
                         vertical_momentum = -15
-                    if tank_test_top_left == True and tank_test_left_middle == True or tank_test_top_right == True and tank_test_right_middle == True:
-                        player_rect = pygame.Rect(100,100,48,96)
-                        load_map_timer = 0
-                        rudar_sez= []
-                        lučkar_sez =[]
-                        tank_sez = []
-                        coin_sez = []
-                        jump_pad_sez = []
-                        player_score = 0
-                        tile_rects = []
                     if tanks.tank_hp == 0:
                         tanks.tank_alive = False
 
-        player_movement = [0,0]
         if moving_right == True:
             player_movement[0] += 5
         if moving_left == True:
@@ -457,7 +398,7 @@ def main():
                 if event.key == K_LEFT:
                     moving_left = True
                 if event.key == K_UP:
-                    if air_timer < 6:
+                    if air_timer < 3:
                         vertical_momentum = -15
 
             if event.type == KEYUP:
@@ -469,13 +410,15 @@ def main():
         #test+=1
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(60)         
 
-menu = pygame_menu.Menu(800, 1200, 'Welcome',
-                       theme=pygame_menu.themes.THEME_BLUE)
+""" menu = pygame_menu.Menu(800, 100, 'Zasavje 2525: Maščevanje Janeza',
+                       theme=pygame_menu.themes.THEME_DARK)
 
-menu.add.text_input('Name :', default='John Doe')
-menu.add.button('Play', main)
-menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.add.text_input('Ime :', default='Janez Novak')
+menu.add.button('Igraj', main)
+menu.add.button('Izhod', pygame_menu.events.EXIT)
 
-menu.mainloop(screen)
+menu.mainloop(screen) """
+
+main()
