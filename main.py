@@ -247,27 +247,27 @@ def main():
                     player_score += 1 #player scoru dodamo 1
                     coins.coin_alive = False # coin nastavimo na "dead", da se ne prikazuje več
 
-        for rudars in rudar_sez: #vse 
-            if rudars.rudar_alive == True:
-                rudars.rudar_movement_y += 1
-                rudar_rects = pygame.Rect(rudars.rudar_x_pos,rudars.rudar_y_pos,48,96)
-                rudar_top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)
-                if player_rect.x + 1200 > rudar_rects.x:
-                    if rudars.rudar_x_pos > player_rect.x+50:
-                        rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")
+        for rudars in rudar_sez: #za vse rudarje v seznamu
+            if rudars.rudar_alive == True: #če je rudar živ
+                rudars.rudar_movement_y += 1 #y os rudarja prištejemo 1
+                rudar_rects = pygame.Rect(rudars.rudar_x_pos,rudars.rudar_y_pos,48,96) #rudarjev celoten rect
+                rudar_top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)#colider za testiranje stranskih dotikov
+                if player_rect.x + 1200 > rudar_rects.x: #Se zacne premikati če se player pribljiža rudarjem
+                    if rudars.rudar_x_pos > player_rect.x+50: #premikanje rudarja gelde na kater istrani rudarja je player
+                        rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")#zamenjava animacije
                         rudars.rudar_flip = True
                         rudars.rudar_movement_x = -1
                     elif rudars.rudar_x_pos < player_rect.x-50:
                         rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action, rudars.rudar_frame,"rudar_walk")
                         rudars.rudar_flip = False
                         rudars.rudar_movement_x = 1
-                rudar_rects, collisions = move(rudar_rects, [rudars.rudar_movement_x,rudars.rudar_movement_y], tile_rects)
-                if collisions["bottom"] == True:
-                    rudars.rudar_movement_y = 0
+                rudar_rects, collisions = move(rudar_rects, [rudars.rudar_movement_x,rudars.rudar_movement_y], tile_rects)#preverjanje collisionov glede na tile
+                if collisions["bottom"] == True: #če se dotika tila spodaj
+                    rudars.rudar_movement_y = 0 #se y os ne spreminja
                 if rudar_rects.y > 800:
                     rudars.rudar_alive = False
-                if player_rect.x + 1200 > rudar_rects.x:
-                    if collisions["left"] == True or collisions["right"] == True:
+                if player_rect.x + 1200 > rudar_rects.x:#enako kot zgoraj
+                    if collisions["left"] == True or collisions["right"] == True:#če se rudar zabije v levo ali denso stran ostane primeru
                         rudars.rudar_movement_x = 0
                     rudars.rudar_x_pos += rudars.rudar_movement_x
                     rudars.rudar_y_pos += rudars.rudar_movement_y
