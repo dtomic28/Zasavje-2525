@@ -1,4 +1,4 @@
-import pygame, sys, os, random, pygame_menu
+import pygame, sys, os, random
 
 clock = pygame.time.Clock()
 
@@ -129,7 +129,7 @@ game_map = load_map('map')
 grass_img = pygame.image.load('grass.png')
 dirt_img = pygame.image.load('dirt.png')
 coin_img = pygame.image.load("coin.png")
-jump_pad_img = pygame.image.load("jump_pad.png")
+#jump_pad_img = pygame.image.load("jump_pad.png")
 
 
 player_action = 'player_idle'
@@ -192,24 +192,24 @@ def main():
     while True: # game loop
         display.fill((76,0,150)) # clear screen by filling it with blue
         y = 0
-        scroll[0] += (player_rect.x-scroll[0] - (500+16))/20
-        scroll[1] = -200
-        for layer in game_map:
-            x = 0
-            if player_rect.y+800 > y*64:
-                for tile in layer:
-                    if load_map_timer == 0:
-                        if tile == "1" or tile == "2":
-                            tile_rects.append(pygame.Rect(x*64,y*64,64,64))
-                    if player_rect.x+1200 > x*64:
-                        if tile == '1':
-                            display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1]))
-                        if tile == '2':
-                            display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1]))
-                    if load_map_timer == 0:
-                        if tile == "l":
-                            lučkar1 = lučkar(x * 64-32, y * 64-32, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0)
-                            lučkar_sez.append(lučkar1)
+        scroll[0] += (player_rect.x-scroll[0] - (500+16))/20 #premikanje kamere na x osi
+        scroll[1] = -200 # y os kamera
+        for layer in game_map: #za vsako vrstico v mapi
+            x = 0 #x nastavimo na 0
+            if player_rect.y+800 > y*64: #optimizacija blokov na y osi
+                for tile in layer: #za vsako kocko v plasti
+                    if load_map_timer == 0: #poskrbi za enkratno spawnanje objektov
+                        if tile == "1" or tile == "2": #če je dirt ali grass nastavi rect.
+                            tile_rects.append(pygame.Rect(x*64,y*64,64,64)) #nastavimo rect
+                    if player_rect.x+1000 > x*64 and player_rect.x-700 <x*64: #optimizacija x osi
+                        if tile == '1': #pogledamo, če je tile 1
+                            display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
+                        if tile == '2': #pogledamo če je tile 2
+                            display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
+                    if load_map_timer == 0: #pogledamo če je load timer 0, kar pomeni, da se samo 1x spawna
+                        if tile == "l": #če je tile lučkar
+                            lučkar1 = lučkar(x * 64-32, y * 64-32, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0) #ustvarimo lučkarja
+                            lučkar_sez.append(lučkar1)#ga appendamo na sez lučkarjev
                         if tile == "r":
                             rudar1 = rudar(x * 64-32, y * 64-32, 48, 96, "rudar_walk", 0, False, 0, 0, True)
                             rudar_sez.append(rudar1)
@@ -219,56 +219,55 @@ def main():
                         if tile == "c":
                             coin1 = coin(x * 64, y * 64 - 32, 16, 16, (x * 64-16, y * 64 - 32, 16, 16), True)
                             coin_sez.append(coin1)
-                        if tile == "j":
-                            jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
-                            jump_pad_sez.append(jump_pad1)
-                    x += 1
+                        #if tile == "j":
+                            #jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                           # jump_pad_sez.append(jump_pad1)
+                    x += 1 #x+1
 
-            y += 1
-        load_map_timer = 1
-
-
-        for jump_pads in jump_pad_sez:
-            display.blit(jump_pad_img,(jump_pads.jump_pad_x_pos - scroll[0],jump_pads.jump_pad_y_pos-scroll[1]))
-            if player_rect.colliderect(jump_pads.jump_pad_rect):
-                if jump_pads.jump_pad_cd == 0:
-                    vertical_momentum=-20
-                    jump_pads.jump_pad_cd = 60
-            if jump_pads.jump_pad_cd != 0:
-                jump_pads.jump_pad_cd -=1
+            y += 1 #y+1
+        load_map_timer = 1 #load timer nastavimo na 1 če je že šlo čez celo zanko
 
 
-        for coins in coin_sez:
-            if coins.coin_alive == True:
-                pickup_test = player_rect.colliderect(coins.colider)
-                display.blit(coin_img, (coins.x_pos - scroll[0], coins.y_pos - scroll[1]))
-                if pickup_test == True:
-                    coins.colider = (0, 0, 0, 0)
-                    player_score += 1
-                    coins.coin_alive = False
-                    print(player_score)
+        #for jump_pads in jump_pad_sez: # za vsak jump pad na mapi
+         #   display.blit(jump_pad_img,(jump_pads.jump_pad_x_pos - scroll[0],jump_pads.jump_pad_y_pos-scroll[1])) # prikaže jump pad
+          #  if player_rect.colliderect(jump_pads.jump_pad_rect): #če se player dotakne jump pada
+           #     if jump_pads.jump_pad_cd == 0: #če jump pad nima cd-ja
+            #        vertical_momentum=-20 #player skoči
+             #       jump_pads.jump_pad_cd = 60 #nastavi jump pad cd
+            #if jump_pads.jump_pad_cd != 0: #Zmanjševanje cd-ja
+             #   jump_pads.jump_pad_cd -=1
 
-        for rudars in rudar_sez:
-            if rudars.rudar_alive == True:
-                rudars.rudar_movement_y += 1
-                rudar_rects = pygame.Rect(rudars.rudar_x_pos,rudars.rudar_y_pos,48,96)
-                rudar_top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)
-                if player_rect.x + 1200 > rudar_rects.x:
-                    if rudars.rudar_x_pos > player_rect.x+50:
-                        rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")
+
+        for coins in coin_sez: #vse coine v seznamu
+            if coins.coin_alive == True: #če coin še ni bil pobran
+                pickup_test = player_rect.colliderect(coins.colider) # ali se player dotkne coina
+                display.blit(coin_img, (coins.x_pos - scroll[0], coins.y_pos - scroll[1])) # prikazovanje coinov
+                if pickup_test == True: #če se player dotakne coina
+                    coins.colider = (0, 0, 0, 0) #coin colider nastavi na 0000
+                    player_score += 1 #player scoru dodamo 1
+                    coins.coin_alive = False # coin nastavimo na "dead", da se ne prikazuje več
+
+        for rudars in rudar_sez: #za vse rudarje v seznamu
+            if rudars.rudar_alive == True: #če je rudar živ
+                rudars.rudar_movement_y += 1 #y os rudarja prištejemo 1
+                rudar_rects = pygame.Rect(rudars.rudar_x_pos,rudars.rudar_y_pos,48,96) #rudarjev celoten rect
+                rudar_top_colider = pygame.Rect(rudars.rudar_x_pos, rudars.rudar_y_pos, 48, 48)#colider za testiranje stranskih dotikov
+                if player_rect.x + 1200 > rudar_rects.x: #Se zacne premikati če se player pribljiža rudarjem
+                    if rudars.rudar_x_pos > player_rect.x+50: #premikanje rudarja gelde na kater istrani rudarja je player
+                        rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")#zamenjava animacije
                         rudars.rudar_flip = True
                         rudars.rudar_movement_x = -1
                     elif rudars.rudar_x_pos < player_rect.x-50:
                         rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action, rudars.rudar_frame,"rudar_walk")
                         rudars.rudar_flip = False
                         rudars.rudar_movement_x = 1
-                rudar_rects, collisions = move(rudar_rects, [rudars.rudar_movement_x,rudars.rudar_movement_y], tile_rects)
-                if collisions["bottom"] == True:
-                    rudars.rudar_movement_y = 0
+                rudar_rects, collisions = move(rudar_rects, [rudars.rudar_movement_x,rudars.rudar_movement_y], tile_rects)#preverjanje collisionov glede na tile
+                if collisions["bottom"] == True: #če se dotika tila spodaj
+                    rudars.rudar_movement_y = 0 #se y os ne spreminja
                 if rudar_rects.y > 800:
                     rudars.rudar_alive = False
-                if player_rect.x + 1200 > rudar_rects.x:
-                    if collisions["left"] == True or collisions["right"] == True:
+                if player_rect.x + 1200 > rudar_rects.x:#enako kot zgoraj
+                    if collisions["left"] == True or collisions["right"] == True:#če se rudar zabije v levo ali denso stran ostane primeru
                         rudars.rudar_movement_x = 0
                     rudars.rudar_x_pos += rudars.rudar_movement_x
                     rudars.rudar_y_pos += rudars.rudar_movement_y
@@ -470,7 +469,7 @@ def main():
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
         clock.tick(60)
-
+""" 
 menu = pygame_menu.Menu(800, 1200, 'Welcome',
                        theme=pygame_menu.themes.THEME_BLUE)
 
@@ -478,4 +477,6 @@ menu.add.text_input('Name :', default='John Doe')
 menu.add.button('Play', main)
 menu.add.button('Quit', pygame_menu.events.EXIT)
 
-menu.mainloop(screen)
+menu.mainloop(screen) 
+"""
+main()
