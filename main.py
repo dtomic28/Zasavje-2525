@@ -1,4 +1,4 @@
-import pygame, sys, os, random, gradient
+import pygame, sys, os, random, gradient, pygame_menu
 
 clock = pygame.time.Clock()
 
@@ -20,6 +20,8 @@ vertical_momentum = 0
 air_timer = 0
 
 scroll = [0,0]
+
+font = pygame.font.SysFont("Teko", 32)
 
 class rudar():
     def __init__(self,rudar_x_pos,rudar_y_pos,rudar_width,rudar_height, rudar_action,rudar_frame,rudar_flip,rudar_movement_x,rudar_movement_y,rudar_alive):
@@ -78,10 +80,17 @@ class tank():
         self.tank_movement_x = tank_movement_x
         self.tank_movement_y = tank_movement_y
         self.tank_alive = tank_alive
-        self.tank_hp = 10
+        self.tank_hp = 3
 
 class jump_pad():
     def __init__(self,jump_pad_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
+        self.jump_pad_x_pos = jump_pad_x_pos
+        self.jump_pad_y_pos = jump_pad_y_pos
+        self.jump_pad_rect = jump_pad_rect
+        self.jump_pad_cd = jump_pad_cd
+
+class teleport_pad_up():
+    def __init__(self,teleport_pad_up_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
         self.jump_pad_x_pos = jump_pad_x_pos
         self.jump_pad_y_pos = jump_pad_y_pos
         self.jump_pad_rect = jump_pad_rect
@@ -123,6 +132,10 @@ def change_action(action_var,frame,new_value):
         frame = 0
     return action_var,frame
         
+def show_score(x,y):
+    global player_score
+    score = font.render("Score: %d" %player_score, True, (255,255,255))
+    display.blit(score, (x,y))
 
 animation_database = {}
 
@@ -140,7 +153,7 @@ grass_img = pygame.image.load('grass.png')
 dirt_img = pygame.image.load('dirt.png')
 coin_img = pygame.image.load("coin.png")
 jump_pad_img = pygame.image.load("jump_pad.png")
-background_img = pygame.image.load("bg.png")
+background_img = pygame.image.load("bg.png").convert()
 
 
 player_action = 'player_idle'
@@ -202,7 +215,7 @@ def main():
     global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl
 
     while True: # game loop
-        display.blit(background_img, (0,0)) # clear screen by filling it with blue
+        display.blit(background_img, (0,0))# clear screen by filling it with blue
         y = 0
         scroll[0] += (player_rect.x-scroll[0] - (500+16))/20 #premikanje kamere na x osi
         scroll[1] = -100 # y os kamera
@@ -211,7 +224,7 @@ def main():
             if player_rect.y+800 > y*64: #optimizacija blokov na y osi
                 for tile in layer: #za vsako kocko v plasti
                     if load_map_timer == 0: #poskrbi za enkratno spawnanje objektov
-                        if tile == "1" or tile == "2": #če je dirt ali grass nastavi rect.
+                        if tile == "1" or tile == "2" or tile == "3": #če je dirt ali grass nastavi rect.
                             tile_rects.append(pygame.Rect(x*64,y*64,64,64)) #nastavimo rect
                     if player_rect.x+1000 > x*64 and player_rect.x-700 <x*64: #optimizacija x osi
                         if tile == '1': #pogledamo, če je tile 1
@@ -504,16 +517,22 @@ def main():
                     moving_left = False
         player_jump = False
         #test+=1
+        show_score(0,0)
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
         clock.tick(60)
- 
-""" menu = pygame_menu.Menu(800, 1200, 'Welcome',
-                       theme=pygame_menu.themes.THEME_DARK)
 
-menu.add.text_input('Name :', default='John Doe')
+menu_font = pygame_menu.font.FONT_8BIT
+
+menu_background_image = pygame_menu.baseimage.BaseImage(image_path = "background.png")
+menu_theme = pygame_menu.themes.THEME_DARK.copy()
+menu_theme.background_color = menu_background_image
+menu_theme.widget_font = menu_font
+menu_theme.widget_font_size = 64
+
+menu = pygame_menu.Menu(800, 1200, '',
+                       theme = menu_theme)
 menu.add.button('Play', main)
 menu.add.button('Quit', pygame_menu.events.EXIT)
 
-menu.mainloop(screen)  """
-main()
+menu.mainloop(screen) 
