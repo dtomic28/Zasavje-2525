@@ -1,3 +1,4 @@
+from typing import final
 import pygame, sys, os, random, gradient, pygame_menu
 
 clock = pygame.time.Clock()
@@ -149,6 +150,8 @@ def show_score(x,y):
     score = font.render("Score: %d" %(final_score + player_score) , True, (255,255,255))
     display.blit(score, (x,y))
 
+
+
 animation_database = {}
 
 animation_database['player_walk'] = load_animation('game/assets/characters/janez/player_walk', [0, 1, 2, 3, 4,5,6,7])
@@ -178,7 +181,6 @@ player_flip = False
 player_score = 0
 player_final_score = 0
 
-#test = 0
 
 player_rect = pygame.Rect(100,300,48,96)
 
@@ -231,6 +233,7 @@ def move(rect,movement,tiles):
             rect.top = tile.bottom
             collision_types['top'] = True
     return rect, collision_types
+
 
 def main():
     global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer 
@@ -600,7 +603,6 @@ def main():
                     if air_timer < 6:
                         vertical_momentum = -15
                 if event.key == K_ESCAPE:
-                    print("****************** %d" %final_score)
                     return
 
             if event.type == KEYUP:
@@ -619,50 +621,49 @@ def main():
         clock.tick(60)
 
 
-menu_font = pygame_menu.font.FONT_8BIT
+menu_font = pygame_menu.font.FONT_8BIT #izberemo font za glavni meni
 
-menu_background_image = pygame_menu.baseimage.BaseImage(image_path = "background.png")
-menu_theme = pygame_menu.themes.THEME_DARK.copy()
-menu_theme.background_color = menu_background_image
-menu_theme.widget_font = menu_font
-menu_theme.widget_font_size = 64
+menu_background_image = pygame_menu.baseimage.BaseImage(image_path = "background.png") #odpremo sliko za temo glavnega menija
+menu_theme = pygame_menu.themes.THEME_DARK.copy() #kopiramo že obstoječo temo, ki jo bomo uredili
+menu_theme.background_color = menu_background_image #temi nastavimo sliko ozadja
+menu_theme.widget_font = menu_font #nastavimo izbrani font
+menu_theme.widget_font_size = 64 #nastavimo izbrano velikost besedila
 
-submenu_font = pygame_menu.font.FONT_8BIT
+submenu_font = pygame_menu.font.FONT_8BIT #za podmeni izberemo font
 
-submenu_theme = pygame_menu.themes.THEME_DARK.copy()
-submenu_theme.widget_font = menu_font
-submenu_theme.widget_font_size = 32
-submenu_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
-submenu_theme.widget_margin = (0,15)
-submenu_theme.widget_selection_effect=pygame_menu.widgets.SimpleSelection()
-
-print("************ %s" %str(final_score))
+submenu_theme = pygame_menu.themes.THEME_DARK.copy() #kopiramo temo, ki jo bomo preuredili
+submenu_theme.widget_font = menu_font #nastavimo font menija
+submenu_theme.widget_font_size = 32 #nastavimo velikost texta
+submenu_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER #nastavimo kako, bodo postavljeni elementi
+submenu_theme.widget_margin = (0,15) #nastavimo razmik med gumbi oz. elementi
+submenu_theme.widget_selection_effect=pygame_menu.widgets.SimpleSelection() #nastavimo, kako se bodo označevali elementi
 
 
-def shop_menu():
-    global final_score
-    play_submenu = pygame_menu.Menu(
-        height=800,
-        theme= submenu_theme,
-        title='Submenu',
-        width=1200,
+def shop_menu(): #definiramo metodo za dostop do podmenija
+    global final_score #uporabimo globalno spremenljivko, ki nam shranjuje vrednost 
+    play_submenu = pygame_menu.Menu( #inicializiramo meni
+        height=800, #mu nastavimo velikost
+        theme= submenu_theme, #temo 
+        title='Submenu', #naslov
+        width=1200, #širino
     )
 
-
-    play_submenu.add.label(str(final_score))
-    play_submenu.add.button("Tank HP down   value", None)
+    play_submenu.add.label(final_score) #dodamo mu vrednost premoga
+    play_submenu.add.button("Tank HP down   value", None) #dodamo gumb za upgrade
     play_submenu.add.button("Lampist attack 1sec downgrade   value", None)
     play_submenu.add.button("Rudar speed down   value", None)
     play_submenu.add.button("Player jump upgrade   value", None)
     play_submenu.add.button("Player speed upgrade   value", None)
-    play_submenu.add.button('Quit', pygame_menu.events.CLOSE)
-    play_submenu.mainloop(screen)
+    play_submenu.add.button("BACK", play_submenu.disable) #dodamo exit gumb
+
+    play_submenu.mainloop(screen) #ustvarimo mainloop za meni
 
 
-menu = pygame_menu.Menu(800, 1200, '',
+
+menu = pygame_menu.Menu(800, 1200, '', #ustvarimo glavni meni
                        theme = menu_theme)
-menu.add.button('Play', main)
-menu.add.button('Menu', shop_menu)
-menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.add.button('Play', main) #ustvarimo gumb za igranje same igre
+menu.add.button('Menu', shop_menu) #ustvarimo gumb za shop
+menu.add.button('Quit', pygame_menu.events.EXIT) #in ustvarimo gumb za izhod
 
-menu.mainloop(screen) 
+menu.mainloop(screen) #ustvarimo mainloop za glavni meni
