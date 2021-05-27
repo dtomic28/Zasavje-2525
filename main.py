@@ -4,7 +4,6 @@ clock = pygame.time.Clock()
 
 from pygame.locals import *
 pygame.init() # initiates pygame
-
 pygame.display.set_caption('Pygame Platformer')
 
 WINDOW_SIZE = (1200,800)
@@ -90,13 +89,28 @@ class jump_pad():
         self.jump_pad_cd = jump_pad_cd
 
 class teleport_pad_up():
-    def __init__(self,teleport_pad_up_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
-        self.jump_pad_x_pos = jump_pad_x_pos
-        self.jump_pad_y_pos = jump_pad_y_pos
-        self.jump_pad_rect = jump_pad_rect
-        self.jump_pad_cd = jump_pad_cd
+    def __init__(self,teleport_pad_up_x_pos,teleport_pad_up_y_pos,teleport_pad_up_rect,teleport_pad_up_cd):
+        self.teleport_pad_up_x_pos = teleport_pad_up_x_pos
+        self.teleport_pad_up_y_pos = teleport_pad_up_y_pos
+        self.teleport_pad_up_rect = teleport_pad_up_rect
+        self.teleport_pad_up_cd = teleport_pad_up_cd
+    
+class speed_up_pad():
+    def __init__(self,speed_up_pad_x_pos,speed_up_pad_y_pos,speed_up_pad_rect):
+        self.speed_up_pad_x_pos = speed_up_pad_x_pos
+        self.speed_up_pad_y_pos = speed_up_pad_y_pos
+        self.speed_up_pad_rect = speed_up_pad_rect
 
+class teleport_pad_down():
+    def __init__(self,teleport_pad_down_x_pos,teleport_pad_down_y_pos,teleport_pad_down_rect,teleport_pad_down_cd):
+        self.teleport_pad_down_x_pos = teleport_pad_down_x_pos
+        self.teleport_pad_down_y_pos = teleport_pad_down_y_pos
+        self.teleport_pad_down_rect = teleport_pad_down_rect
+        self.teleport_pad_down_cd = teleport_pad_down_cd
+
+map_lvl = 0
 def load_map(path):
+    global map_lvl
     f = open("game/maps/map"+str(map_lvl)+'.txt', "r")
     data = f.read()
     f.close()
@@ -105,7 +119,6 @@ def load_map(path):
     for row in data:
         game_map.append(list(row))
     return game_map
-map_lvl = 0
 
 global animation_frames
 animation_frames = {}
@@ -118,7 +131,6 @@ def load_animation(path,frame_durations):
     for frame in frame_durations:
         animation_frame_id = animation_name + str(n)
         img_loc = path + '/' + animation_frame_id + '.png'
-        print(img_loc)
         animation_image = pygame.image.load(img_loc)
         animation_frames[animation_frame_id] = animation_image.copy()
         for i in range(frame):
@@ -133,8 +145,8 @@ def change_action(action_var,frame,new_value):
     return action_var,frame
         
 def show_score(x,y):
-    global player_score
-    score = font.render("Score: %d" %player_score, True, (255,255,255))
+    global final_score, player_score
+    score = font.render("Score: %d" %(final_score + player_score) , True, (255,255,255))
     display.blit(score, (x,y))
 
 animation_database = {}
@@ -154,6 +166,10 @@ dirt_img = pygame.image.load('dirt.png')
 coin_img = pygame.image.load("coin.png")
 jump_pad_img = pygame.image.load("jump_pad.png")
 background_img = pygame.image.load("bg.png").convert()
+endpoint_img = pygame.image.load("endpoint.png")
+teleport_pad_down_img = pygame.image.load("teleport_pad_down.png")
+teleport_pad_up_img = pygame.image.load("teleport_pad_up.png")
+speed_up_pad_img = pygame.image.load("speed.png")
 
 
 player_action = 'player_idle'
@@ -180,7 +196,12 @@ tile_rects = []
 coin_sez = []
 jump_pad_sez = []
 end_sez = []
+teleport_pad_down_sez = []
+teleport_pad_up_sez = []
+speed_up_pad_sez = []
 load_map_timer = 0
+final_score = 0
+speed_up_timer = 0
 
 def collision_test(rect,tiles):
     hit_list = []
@@ -212,7 +233,7 @@ def move(rect,movement,tiles):
     return rect, collision_types
 
 def main():
-    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl
+    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer 
 
     while True: # game loop
         display.blit(background_img, (0,0))# clear screen by filling it with blue
@@ -248,8 +269,17 @@ def main():
                             jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
                             jump_pad_sez.append(jump_pad1)
                         if tile =="e":
-                            end1= end(x*64,y*64,64,128,(x*64,y*64,64,128))
+                            end1= end(x*64,y*64,64,128,(x*64,y*64,64-63,128-(256+64+23)))
                             end_sez.append(end1)
+                        if tile =="d":
+                            teleport_pad_down1 = teleport_pad_down(x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                            teleport_pad_down_sez.append(teleport_pad_down1)
+                        if tile =="u":
+                            teleport_pad_up1 = teleport_pad_up(x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                            teleport_pad_up_sez.append(teleport_pad_up1)
+                        if tile =="s":
+                            speed_up_pad1 = speed_up_pad(x*64,y*64+59,(x*64,y*64+48,64,5))
+                            speed_up_pad_sez.append(speed_up_pad1)
                     x += 1 #x+1
 
             y += 1 #y+1
@@ -265,17 +295,50 @@ def main():
             if jump_pads.jump_pad_cd != 0: #Zmanjševanje cd-ja
                 jump_pads.jump_pad_cd -=1
 
+        for teleport_pad_downs in teleport_pad_down_sez: # za vsak jump pad na mapi
+            display.blit(teleport_pad_down_img,(teleport_pad_downs.teleport_pad_down_x_pos - scroll[0],teleport_pad_downs.teleport_pad_down_y_pos-scroll[1])) # prikaže jump pad
+            if player_rect.colliderect(teleport_pad_downs.teleport_pad_down_rect): #če se player dotakne jump pada
+                if teleport_pad_downs.teleport_pad_down_cd == 0: #če jump pad nima cd-ja
+                    player_rect.y+=192
+                    teleport_pad_downs.teleport_pad_down_cd = 60 #nastavi jump pad cd
+            if teleport_pad_downs.teleport_pad_down_cd != 0: #Zmanjševanje cd-ja
+                teleport_pad_downs.teleport_pad_down_cd -=1
+        
+        for teleport_pad_ups in teleport_pad_up_sez: # za vsak jump pad na mapi
+            display.blit(teleport_pad_up_img,(teleport_pad_ups.teleport_pad_up_x_pos - scroll[0],teleport_pad_ups.teleport_pad_up_y_pos-scroll[1])) # prikaže jump pad
+            if player_rect.colliderect(teleport_pad_ups.teleport_pad_up_rect): #če se player dotakne jump pada
+                if teleport_pad_ups.teleport_pad_up_cd == 0: #če jump pad nima cd-ja
+                    player_rect.y-=192
+                    teleport_pad_ups.teleport_pad_up_cd = 60 #nastavi jump pad cd
+            if teleport_pad_ups.teleport_pad_up_cd != 0: #Zmanjševanje cd-ja
+                teleport_pad_ups.teleport_pad_up_cd -=1
+
         for ends in end_sez:
+            display.blit(endpoint_img,(ends.end_x_pos-scroll[0]-63,ends.end_y_pos-(256+64+23)))
             if player_rect.colliderect(ends.end_rect) == True:
                 map_lvl+=1
                 player_rect = pygame.Rect(100,300,48,96)
                 load_map_timer = 0
+                final_score+=player_score
+                player_score = 0
+                end_sez =[]
                 rudar_sez= []
                 lučkar_sez =[]
                 tank_sez = []
                 coin_sez = []
                 jump_pad_sez = []
                 tile_rects = []
+                teleport_pad_down_sez = []
+                teleport_pad_up_sez = []
+                speed_up_pad_sez = []
+                speed_up_timer = 0
+                game_map=load_map("map")
+
+        for speed_up_pads in speed_up_pad_sez: # za vsak jump pad na mapi
+            display.blit(speed_up_pad_img,(speed_up_pads.speed_up_pad_x_pos - scroll[0],speed_up_pads.speed_up_pad_y_pos-scroll[1])) # prikaže jump pad
+            if player_rect.colliderect(speed_up_pads.speed_up_pad_rect): #če se player dotakne jump pada
+                    speed_up_timer = 180
+                
 
 
         for coins in coin_sez: #vse coine v seznamu
@@ -335,6 +398,10 @@ def main():
                         jump_pad_sez = []
                         player_score = 0
                         tile_rects = []
+                        teleport_pad_down_sez = []
+                        teleport_pad_up_sez = []
+                        speed_up_pad_sez = []
+                        speed_up_timer = 0
                     if rudars.rudar_alive == False:
                         rudar_rects = pygame.Rect(0, 0, 0, 0)
 
@@ -401,6 +468,10 @@ def main():
                         jump_pad_sez = []
                         player_score = 0
                         tile_rects = []
+                        teleport_pad_down_sez = []
+                        teleport_pad_up_sez = []
+                        speed_up_pad_sez = []
+                        speed_up_timer = 0
                     if lučkars.lučkar_alive == False:
                         lučkar_rects = pygame.Rect(0, 0, 0, 0)
 
@@ -409,6 +480,7 @@ def main():
                 tanks.tank_movement_y += 1
                 tank_rects = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,54,96)
                 tank_top_colider = pygame.Rect(tanks.tank_x_pos, tanks.tank_y_pos, 54, 48)
+                fix_colider = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,26,48)
                 if player_rect.x + 1200 > tank_rects.x:
                     if tanks.tank_x_pos > player_rect.x+50:
                         tanks.tank_action, tanks.rudar_frame = change_action(tanks.tank_action,tanks.tank_frame, "tank_walk")
@@ -436,7 +508,8 @@ def main():
                     tank_test_top_right = player_rect.collidepoint(tank_rects.topright)
                     tank_test_left_middle = player_rect.collidepoint(tank_top_colider.midleft)
                     tank_test_right_middle = player_rect.collidepoint(tank_top_colider.midright)
-                    if tank_test_top_left == True or tank_test_top_right == True:
+                    tank_test_top_fix = player_rect.collidepoint(fix_colider.topright)
+                    if tank_test_top_left == True or tank_test_top_right == True or tank_test_top_fix == True:
                         tanks.tank_hp -= 1
                         vertical_momentum = -15
                     if tank_test_top_left == True and tank_test_left_middle == True or tank_test_top_right == True and tank_test_right_middle == True:
@@ -449,14 +522,27 @@ def main():
                         jump_pad_sez = []
                         player_score = 0
                         tile_rects = []
+                        teleport_pad_down_sez = []
+                        teleport_pad_up_sez = []
+                        speed_up_pad_sez = []
+                        speed_up_timer = 0
                     if tanks.tank_hp == 0:
                         tanks.tank_alive = False
 
         player_movement = [0,0]
         if moving_right == True:
-            player_movement[0] += 5
+            if speed_up_timer == 0:
+                player_movement[0] += 5
+            else:
+                player_movement[0] +=10
         if moving_left == True:
-            player_movement[0] -= 5
+            if speed_up_timer == 0:
+                player_movement[0] -= 5
+            else:
+                player_movement[0] -=10
+        speed_up_timer -=1
+        if speed_up_timer <= 0:
+            speed_up_timer = 0
         player_movement[1] += vertical_momentum
         vertical_momentum += 0.5
         if vertical_momentum > 100:
@@ -496,6 +582,10 @@ def main():
             jump_pad_sez = []
             player_score = 0
             tile_rects = []
+            teleport_pad_down_sez = []
+            teleport_pad_up_sez = []
+            speed_up_pad_sez = []
+            speed_up_timer = 0
 
         for event in pygame.event.get(): # event loop
             if event.type == QUIT:
@@ -509,18 +599,25 @@ def main():
                 if event.key == K_UP:
                     if air_timer < 6:
                         vertical_momentum = -15
+                if event.key == K_ESCAPE:
+                    print("****************** %d" %final_score)
+                    return
 
             if event.type == KEYUP:
                 if event.key == K_RIGHT:
                     moving_right = False
                 if event.key == K_LEFT:
                     moving_left = False
+
         player_jump = False
         #test+=1
-        show_score(0,0)
+
+        show_score(50,15)
+        display.blit(coin_img,(5,5))
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
         clock.tick(60)
+
 
 menu_font = pygame_menu.font.FONT_8BIT
 
@@ -530,9 +627,42 @@ menu_theme.background_color = menu_background_image
 menu_theme.widget_font = menu_font
 menu_theme.widget_font_size = 64
 
+submenu_font = pygame_menu.font.FONT_8BIT
+
+submenu_theme = pygame_menu.themes.THEME_DARK.copy()
+submenu_theme.widget_font = menu_font
+submenu_theme.widget_font_size = 32
+submenu_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
+submenu_theme.widget_margin = (0,15)
+submenu_theme.widget_selection_effect=pygame_menu.widgets.SimpleSelection()
+
+print("************ %s" %str(final_score))
+
+
+def shop_menu():
+    global final_score
+    play_submenu = pygame_menu.Menu(
+        height=800,
+        theme= submenu_theme,
+        title='Submenu',
+        width=1200,
+    )
+
+
+    play_submenu.add.label(str(final_score))
+    play_submenu.add.button("Tank HP down   value", None)
+    play_submenu.add.button("Lampist attack 1sec downgrade   value", None)
+    play_submenu.add.button("Rudar speed down   value", None)
+    play_submenu.add.button("Player jump upgrade   value", None)
+    play_submenu.add.button("Player speed upgrade   value", None)
+    play_submenu.add.button('Quit', pygame_menu.events.CLOSE)
+    play_submenu.mainloop(screen)
+
+
 menu = pygame_menu.Menu(800, 1200, '',
                        theme = menu_theme)
 menu.add.button('Play', main)
+menu.add.button('Menu', shop_menu)
 menu.add.button('Quit', pygame_menu.events.EXIT)
 
 menu.mainloop(screen) 
