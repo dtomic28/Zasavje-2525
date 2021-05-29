@@ -69,7 +69,7 @@ class lučkar():
         self.lučkar_attack_timer = lučkar_attack_timer
 
 class tank():
-    def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive):
+    def __init__(self,tank_x_pos,tank_y_pos,tank_width,tank_height, tank_action,tank_frame,tank_flip,tank_movement_x,tank_movement_y,tank_alive,tank_hp):
         self.tank_x_pos = tank_x_pos
         self.tank_y_pos = tank_y_pos
         self.tank_width = tank_width
@@ -80,7 +80,7 @@ class tank():
         self.tank_movement_x = tank_movement_x
         self.tank_movement_y = tank_movement_y
         self.tank_alive = tank_alive
-        self.tank_hp = 3
+        self.tank_hp = tank_hp
 
 class jump_pad():
     def __init__(self,jump_pad_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
@@ -150,7 +150,54 @@ def show_score(x,y):
     score = font.render("Score: %d" %(final_score + player_score) , True, (255,255,255))
     display.blit(score, (x,y))
 
+button1_clicked = 0
+button2_clicked = 0
+button3_clicked = 0
+button4_clicked = 0
+button5_clicked = 0
 
+tank_live = 3
+def button_1():
+    global tank_live, button1_clicked,final_score
+    if final_score >= 40 and button1_clicked != 1:
+        final_score-=40
+        button1_clicked = 1
+        tank_live = 2
+        return(tank_live, button1_clicked,final_score)
+
+lampist_wait_timer = 120
+def button_2():
+    global lampist_wait_timer,button2_clicked,final_score
+    if final_score >= 20 and button2_clicked != 1:
+        final_score-=20
+        button2_clicked = 1
+        lampist_wait_timer = 60
+        return(lampist_wait_timer,button2_clicked,final_score)
+
+rudar_speed = 1
+def button_3():
+    global rudar_speed, button3_clicked, final_score
+    if final_score >= 30 and button3_clicked != 1:
+        final_score -= 30
+        button3_clicked = 1
+        rudar_speed = 0.8
+        return (rudar_speed, button3_clicked, final_score)
+player_jump_up = -15
+def button_4():
+    global player_jump_up, button4_clicked, final_score
+    if final_score >= 40 and button4_clicked != 1:
+        final_score -= 40
+        button4_clicked = 1
+        player_jump_up = -17.5
+        return (player_jump_up, button4_clicked, final_score)
+player_speed = 5
+def button_5():
+    global player_speed, button5_clicked, final_score
+    if final_score >= 50 and button5_clicked != 1:
+        final_score -= 50
+        button5_clicked = 1
+        player_speed = 7.5
+        return (player_speed, button5_clicked, final_score)
 
 animation_database = {}
 
@@ -179,7 +226,6 @@ player_action = 'player_idle'
 player_frame = 0
 player_flip = False
 player_score = 0
-player_final_score = 0
 
 
 player_rect = pygame.Rect(100,300,48,96)
@@ -236,7 +282,7 @@ def move(rect,movement,tiles):
 
 
 def main():
-    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer 
+    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer,tank_live, lampist_wait_timer,rudar_speed, player_jump_up,player_speed
 
     while True: # game loop
         display.blit(background_img, (0,0))# clear screen by filling it with blue
@@ -245,45 +291,44 @@ def main():
         scroll[1] = -100 # y os kamera
         for layer in game_map: #za vsako vrstico v mapi
             x = 0 #x nastavimo na 0
-            if player_rect.y+800 > y*64: #optimizacija blokov na y osi
-                for tile in layer: #za vsako kocko v plasti
-                    if load_map_timer == 0: #poskrbi za enkratno spawnanje objektov
-                        if tile == "1" or tile == "2" or tile == "3": #če je dirt ali grass nastavi rect.
-                            tile_rects.append(pygame.Rect(x*64,y*64,64,64)) #nastavimo rect
-                    if player_rect.x+1000 > x*64 and player_rect.x-700 <x*64: #optimizacija x osi
-                        if tile == '1': #pogledamo, če je tile 1
-                            display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
-                        if tile == '2': #pogledamo če je tile 2
-                            display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
-                    if load_map_timer == 0: #pogledamo če je load timer 0, kar pomeni, da se samo 1x spawna
-                        if tile == "l": #če je tile lučkar
-                            lučkar1 = lučkar(x * 64-32, y * 64-32, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0) #ustvarimo lučkarja
-                            lučkar_sez.append(lučkar1)#ga appendamo na sez lučkarjev
-                        if tile == "r":
-                            rudar1 = rudar(x * 64-32, y * 64-32, 48, 96, "rudar_walk", 0, False, 0, 0, True)
-                            rudar_sez.append(rudar1)
-                        if tile == "t":
-                            tank1 = tank(x * 64-32, y * 64-32, 54, 96, "tank_walk", 0, False, 0, 0, True)
-                            tank_sez.append(tank1)
-                        if tile == "c":
-                            coin1 = coin(x * 64, y * 64 - 32, 16, 16, (x * 64-16, y * 64 - 32, 16, 16), True)
-                            coin_sez.append(coin1)
-                        if tile == "j":
-                            jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
-                            jump_pad_sez.append(jump_pad1)
-                        if tile =="e":
-                            end1= end(x*64,y*64,64,128,(x*64,y*64,64-63,128-(256+64+23)))
-                            end_sez.append(end1)
-                        if tile =="d":
-                            teleport_pad_down1 = teleport_pad_down(x*64,y*64+59,(x*64,y*64+48,64,5),0)
-                            teleport_pad_down_sez.append(teleport_pad_down1)
-                        if tile =="u":
-                            teleport_pad_up1 = teleport_pad_up(x*64,y*64+59,(x*64,y*64+48,64,5),0)
-                            teleport_pad_up_sez.append(teleport_pad_up1)
-                        if tile =="s":
-                            speed_up_pad1 = speed_up_pad(x*64,y*64+59,(x*64,y*64+48,64,5))
-                            speed_up_pad_sez.append(speed_up_pad1)
-                    x += 1 #x+1
+            for tile in layer: #za vsako kocko v plasti
+                if load_map_timer == 0: #poskrbi za enkratno spawnanje objektov
+                    if tile == "1" or tile == "2" or tile == "3": #če je dirt ali grass nastavi rect.
+                        tile_rects.append(pygame.Rect(x*64,y*64,64,64)) #nastavimo rect
+                if player_rect.x+1000 > x*64 and player_rect.x-700 <x*64: #optimizacija x osi
+                    if tile == '1': #pogledamo, če je tile 1
+                        display.blit(dirt_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
+                    if tile == '2': #pogledamo če je tile 2
+                        display.blit(grass_img,(x*64-scroll[0],y*64-scroll[1])) #ga blitamo
+                if load_map_timer == 0: #pogledamo če je load timer 0, kar pomeni, da se samo 1x spawna
+                    if tile == "l": #če je tile lučkar
+                        lučkar1 = lučkar(x * 64-32, y * 64-32, 48, 96, "lučkar_walk", 0, False, 0, 0, True, 180, 0) #ustvarimo lučkarja
+                        lučkar_sez.append(lučkar1)#ga appendamo na sez lučkarjev
+                    if tile == "r":
+                        rudar1 = rudar(x * 64-32, y * 64-32, 48, 96, "rudar_walk", 0, False, 0, 0, True)
+                        rudar_sez.append(rudar1)
+                    if tile == "t":
+                        tank1 = tank(x * 64-32, y * 64-32, 54, 96, "tank_walk", 0, False, 0, 0, True,tank_live)
+                        tank_sez.append(tank1)
+                    if tile == "c":
+                        coin1 = coin(x * 64, y * 64 - 32, 16, 16, (x * 64-16, y * 64 - 32, 16, 16), True)
+                        coin_sez.append(coin1)
+                    if tile == "j":
+                        jump_pad1 = jump_pad (x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                        jump_pad_sez.append(jump_pad1)
+                    if tile =="e":
+                        end1= end(x*64,y*64,64,128,(x*64,y*64,64-63,128-(256+64+23)))
+                        end_sez.append(end1)
+                    if tile =="d":
+                        teleport_pad_down1 = teleport_pad_down(x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                        teleport_pad_down_sez.append(teleport_pad_down1)
+                    if tile =="u":
+                        teleport_pad_up1 = teleport_pad_up(x*64,y*64+59,(x*64,y*64+48,64,5),0)
+                        teleport_pad_up_sez.append(teleport_pad_up1)
+                    if tile =="s":
+                        speed_up_pad1 = speed_up_pad(x*64,y*64+59,(x*64,y*64+48,64,5))
+                        speed_up_pad_sez.append(speed_up_pad1)
+                x += 1 #x+1
 
             y += 1 #y+1
         load_map_timer = 1 #load timer nastavimo na 1 če je že šlo čez celo zanko
@@ -340,7 +385,7 @@ def main():
         for speed_up_pads in speed_up_pad_sez: # za vsak jump pad na mapi
             display.blit(speed_up_pad_img,(speed_up_pads.speed_up_pad_x_pos - scroll[0],speed_up_pads.speed_up_pad_y_pos-scroll[1])) # prikaže jump pad
             if player_rect.colliderect(speed_up_pads.speed_up_pad_rect): #če se player dotakne jump pada
-                    speed_up_timer = 180
+                    speed_up_timer = 90
                 
 
 
@@ -362,11 +407,11 @@ def main():
                     if rudars.rudar_x_pos > player_rect.x+50: #premikanje rudarja gelde na kater istrani rudarja je player
                         rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action,rudars.rudar_frame, "rudar_walk")#zamenjava animacije
                         rudars.rudar_flip = True
-                        rudars.rudar_movement_x = -1
+                        rudars.rudar_movement_x = -rudar_speed
                     elif rudars.rudar_x_pos < player_rect.x-50:
                         rudars.rudar_action, rudars.rudar_frame = change_action(rudars.rudar_action, rudars.rudar_frame,"rudar_walk")
                         rudars.rudar_flip = False
-                        rudars.rudar_movement_x = 1
+                        rudars.rudar_movement_x = rudar_speed
                 rudar_rects, collisions = move(rudar_rects, [rudars.rudar_movement_x,rudars.rudar_movement_y], tile_rects)#preverjanje collisionov glede na tile
                 if collisions["bottom"] == True: #če se dotika tila spodaj
                     rudars.rudar_movement_y = 0 #se y os ne spreminja
@@ -438,7 +483,7 @@ def main():
 
                     if lučkars.lučkar_wait_timer == 0:
                         lučkars.lučkar_wait_timer = 180
-                        lučkars.lučkar_attack_timer = 60
+                        lučkars.lučkar_attack_timer = lampist_wait_timer
                 lučkar_rects, collisions = move(lučkar_rects, [lučkars.lučkar_movement_x,lučkars.lučkar_movement_y], tile_rects)
                 if collisions["bottom"] == True:
                     lučkars.lučkar_movement_y = 0
@@ -480,6 +525,7 @@ def main():
 
         for tanks in tank_sez:
             if tanks.tank_alive == True:
+                print(tanks.tank_hp, tank_live)
                 tanks.tank_movement_y += 1
                 tank_rects = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,54,96)
                 tank_top_colider = pygame.Rect(tanks.tank_x_pos, tanks.tank_y_pos, 54, 48)
@@ -535,12 +581,12 @@ def main():
         player_movement = [0,0]
         if moving_right == True:
             if speed_up_timer == 0:
-                player_movement[0] += 5
+                player_movement[0] += player_speed
             else:
                 player_movement[0] +=10
         if moving_left == True:
             if speed_up_timer == 0:
-                player_movement[0] -= 5
+                player_movement[0] -= player_speed
             else:
                 player_movement[0] -=10
         speed_up_timer -=1
@@ -567,6 +613,9 @@ def main():
             vertical_momentum = 0
         else:
             air_timer += 1
+
+        if collisions["top"] == True:
+            vertical_momentum = 0
 
         player_frame += 1
         if player_frame >= len(animation_database[player_action]):
@@ -601,7 +650,7 @@ def main():
                     moving_left = True
                 if event.key == K_UP:
                     if air_timer < 6:
-                        vertical_momentum = -15
+                        vertical_momentum = player_jump_up
                 if event.key == K_ESCAPE:
                     return
 
@@ -640,7 +689,7 @@ submenu_theme.widget_selection_effect=pygame_menu.widgets.SimpleSelection() #nas
 
 
 def shop_menu(): #definiramo metodo za dostop do podmenija
-    global final_score #uporabimo globalno spremenljivko, ki nam shranjuje vrednost 
+    global final_score,button1_clicked,button2_clicked,button3_clicked,button4_clicked,button5_clicked #uporabimo globalno spremenljivko, ki nam shranjuje vrednost
     play_submenu = pygame_menu.Menu( #inicializiramo meni
         height=800, #mu nastavimo velikost
         theme= submenu_theme, #temo 
@@ -649,11 +698,16 @@ def shop_menu(): #definiramo metodo za dostop do podmenija
     )
 
     play_submenu.add.label(final_score) #dodamo mu vrednost premoga
-    play_submenu.add.button("Tank HP down   value", None) #dodamo gumb za upgrade
-    play_submenu.add.button("Lampist attack 1sec downgrade   value", None)
-    play_submenu.add.button("Rudar speed down   value", None)
-    play_submenu.add.button("Player jump upgrade   value", None)
-    play_submenu.add.button("Player speed upgrade   value", None)
+    if button1_clicked == 0:
+        play_submenu.add.button("Tank HP down   40", button_1) #dodamo gumb za upgrade
+    if button2_clicked == 0:
+        play_submenu.add.button("Lampist attack 1sec downgrade   20", button_2)
+    if button3_clicked == 0:
+        play_submenu.add.button("Rudar speed down   30", button_3)
+    if button4_clicked == 0:
+        play_submenu.add.button("Player jump upgrade   50", button_4)
+    if button5_clicked == 0:
+        play_submenu.add.button("Player speed upgrade   40", button_5)
     play_submenu.add.button("BACK", play_submenu.disable) #dodamo exit gumb
 
     play_submenu.mainloop(screen) #ustvarimo mainloop za meni
