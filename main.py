@@ -525,7 +525,6 @@ def main():
 
         for tanks in tank_sez:
             if tanks.tank_alive == True:
-                print(tanks.tank_hp, tank_live)
                 tanks.tank_movement_y += 1
                 tank_rects = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,54,96)
                 tank_top_colider = pygame.Rect(tanks.tank_x_pos, tanks.tank_y_pos, 54, 48)
