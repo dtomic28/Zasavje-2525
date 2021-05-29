@@ -1,5 +1,4 @@
-from typing import final
-import pygame, sys, os, random, gradient, pygame_menu
+import pygame, sys, random, pygame_menu
 
 clock = pygame.time.Clock()
 
@@ -21,7 +20,7 @@ air_timer = 0
 
 scroll = [0,0]
 
-font = pygame.font.SysFont("Teko", 32)
+font = pygame.font.SysFont("calibri", 32)
 
 class rudar():
     def __init__(self,rudar_x_pos,rudar_y_pos,rudar_width,rudar_height, rudar_action,rudar_frame,rudar_flip,rudar_movement_x,rudar_movement_y,rudar_alive):
@@ -81,6 +80,20 @@ class tank():
         self.tank_movement_y = tank_movement_y
         self.tank_alive = tank_alive
         self.tank_hp = tank_hp
+
+class boss():
+    def __init__(self,boss_x_pos,boss_y_pos,boss_width,boss_height, boss_action,boss_frame,boss_flip,boss_movement_x,boss_movement_y,boss_alive,boss_hp):
+        self.boss_x_pos = boss_x_pos
+        self.boss_y_pos = boss_y_pos
+        self.boss_width = boss_width
+        self.boss_height = boss_height
+        self.boss_action = boss_action
+        self.boss_frame = boss_frame
+        self.boss_flip = boss_flip
+        self.boss_movement_x = boss_movement_x
+        self.boss_movement_y = boss_movement_y
+        self.boss_alive = boss_alive
+        self.boss_hp = boss_hp
 
 class jump_pad():
     def __init__(self,jump_pad_x_pos,jump_pad_y_pos,jump_pad_rect,jump_pad_cd):
@@ -208,6 +221,9 @@ animation_database['rudar_attack'] = load_animation('game/assets/characters/ruda
 animation_database["lučkar_walk"] = load_animation('game/assets/characters/lučkar/lučkar_walk', [0, 1, 2,3,4,5,6,7])
 animation_database["lučkar_attack"] = load_animation('game/assets/characters/lučkar/lučkar_attack', [0, 1, 2,3,4,5,6,7,8,9,10])
 animation_database["tank_walk"] = load_animation('game/assets/characters/tank/tank_walk', [0, 1, 2,3,4,5,6,7,8,9,10,11])
+animation_database["boss_idle"] = load_animation("game/assets/characters/boss/boss_idle", [1])
+animation_database["boss_mad"] = load_animation("game/assets/characters/boss/boss_mad", [1,2])
+animation_database["boss_attack"] = load_animation("game/assets/characters/boss/boss_attack", [1])
 
 game_map = load_map('map')
 
@@ -247,10 +263,14 @@ end_sez = []
 teleport_pad_down_sez = []
 teleport_pad_up_sez = []
 speed_up_pad_sez = []
+boss_sez = []
 load_map_timer = 0
 final_score = 0
 speed_up_timer = 0
-
+boss_up_down = 0
+boss_attack_timer = random.randint(180,300)
+boss_mad_timer = 60
+boss_movement_count = 0
 def collision_test(rect,tiles):
     hit_list = []
     for tile in tiles:
@@ -280,9 +300,11 @@ def move(rect,movement,tiles):
             collision_types['top'] = True
     return rect, collision_types
 
+pygame.mixer.music.load('music.wav')
+pygame.mixer.music.play(-1)
 
 def main():
-    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer,tank_live, lampist_wait_timer,rudar_speed, player_jump_up,player_speed
+    global player_rect,moving_right,moving_left,vertical_momentum,player_action,player_frame,air_timer,player_flip, load_map_timer,tile_rects, player_score,coin_img,coin_sez,jump_pad_sez,jump_pad_img,tank_sez,lučkar_sez,rudar_sez,end_sez,map_lvl,game_map,final_score, endpoint_img,teleport_pad_down_sez,teleport_pad_up_sez, teleport_pad_up_img, teleport_pad_down_img, speed_up_pad_img,speed_up_pad_sez,speed_up_timer,tank_live, lampist_wait_timer,rudar_speed, player_jump_up,player_speed,boss_sez,boss_up_down,boss_attack_timer, boss_mad_timer,boss_movement_count
 
     while True: # game loop
         display.blit(background_img, (0,0))# clear screen by filling it with blue
@@ -328,6 +350,11 @@ def main():
                     if tile =="s":
                         speed_up_pad1 = speed_up_pad(x*64,y*64+59,(x*64,y*64+48,64,5))
                         speed_up_pad_sez.append(speed_up_pad1)
+                    if tile =="B":
+                        boss1 = boss(x * 64-32, y * 64-32, 106, 180, "boss_idle", 0, False, 0, 0, True,12)
+                        boss_sez.append(boss1)
+                        boss_perm_pos_x = x*64-32
+
                 x += 1 #x+1
 
             y += 1 #y+1
@@ -379,7 +406,12 @@ def main():
                 teleport_pad_down_sez = []
                 teleport_pad_up_sez = []
                 speed_up_pad_sez = []
+                boss_sez = []
                 speed_up_timer = 0
+                boss_up_down = 0
+                boss_attack_timer = random.randint(180, 300)
+                boss_mad_timer = 60
+                boss_movement_count = 0
                 game_map=load_map("map")
 
         for speed_up_pads in speed_up_pad_sez: # za vsak jump pad na mapi
@@ -449,7 +481,12 @@ def main():
                         teleport_pad_down_sez = []
                         teleport_pad_up_sez = []
                         speed_up_pad_sez = []
+                        boss_sez = []
                         speed_up_timer = 0
+                        boss_up_down = 0
+                        boss_attack_timer = random.randint(180, 300)
+                        boss_mad_timer = 60
+                        boss_movement_count = 0
                     if rudars.rudar_alive == False:
                         rudar_rects = pygame.Rect(0, 0, 0, 0)
 
@@ -519,7 +556,12 @@ def main():
                         teleport_pad_down_sez = []
                         teleport_pad_up_sez = []
                         speed_up_pad_sez = []
+                        boss_sez = []
                         speed_up_timer = 0
+                        boss_up_down = 0
+                        boss_attack_timer = random.randint(180, 300)
+                        boss_mad_timer = 60
+                        boss_movement_count = 0
                     if lučkars.lučkar_alive == False:
                         lučkar_rects = pygame.Rect(0, 0, 0, 0)
 
@@ -531,7 +573,7 @@ def main():
                 fix_colider = pygame.Rect(tanks.tank_x_pos,tanks.tank_y_pos,26,48)
                 if player_rect.x + 1200 > tank_rects.x:
                     if tanks.tank_x_pos > player_rect.x+50:
-                        tanks.tank_action, tanks.rudar_frame = change_action(tanks.tank_action,tanks.tank_frame, "tank_walk")
+                        tanks.tank_action, tanks.tank_frame = change_action(tanks.tank_action,tanks.tank_frame, "tank_walk")
                         tanks.tank_flip = True
                         tanks.tank_movement_x = -0.5
                     elif tanks.tank_x_pos < player_rect.x-50:
@@ -573,9 +615,136 @@ def main():
                         teleport_pad_down_sez = []
                         teleport_pad_up_sez = []
                         speed_up_pad_sez = []
+                        boss_sez = []
                         speed_up_timer = 0
+                        boss_up_down = 0
+                        boss_attack_timer = random.randint(180, 300)
+                        boss_mad_timer = 60
+                        boss_movement_count = 0
                     if tanks.tank_hp == 0:
                         tanks.tank_alive = False
+
+
+        for bosss in boss_sez:
+            if bosss.boss_alive == True:
+                boss_rects = pygame.Rect(bosss.boss_x_pos,bosss.boss_y_pos,106,180)
+                boss_rect1 = pygame.Rect(bosss.boss_x_pos+28,bosss.boss_y_pos,48,48)
+                boss_rect2 = pygame.Rect(bosss.boss_x_pos, bosss.boss_y_pos,106,90)
+                boss_rect3 = pygame.Rect(bosss.boss_x_pos, bosss.boss_y_pos+90,106,90)
+                boss_rect4 = pygame.Rect(bosss.boss_x_pos,bosss.boss_y_pos,180,106)
+                if boss_attack_timer <= 0:
+                    if boss_mad_timer >0:
+                        boss_attack = False
+                        if bosss.boss_x_pos >player_rect.x:
+                            bosss.boss_action, bosss.boss_frame = change_action(bosss.boss_action, bosss.boss_frame,"boss_mad")
+                            bosss.boss_flip = True
+                            boss_mad_timer -= 1
+                        elif bosss.boss_x_pos < player_rect.x:
+                            bosss.boss_action, bosss.boss_frame = change_action(bosss.boss_action, bosss.boss_frame,"boss_mad")
+                            bosss.boss_flip = False
+                            boss_mad_timer -=1
+                    if boss_mad_timer == 0:
+                        boss_attack = True
+                        bosss.boss_action, bosss.boss_frame = change_action(bosss.boss_action, bosss.boss_frame,"boss_attack")
+                        bosss.boss_flip = False
+                        bosss.boss_movement_x = -20
+                        bosss.boss_movement_y = 0
+                        if bosss.boss_x_pos == boss_perm_pos_x-1500:
+                            bosss.boss_x_pos = boss_perm_pos_x+1500
+                        if bosss.boss_x_pos == boss_perm_pos_x:
+                            boss_movement_count+=1
+                        if boss_movement_count == 3:
+                            boss_movement_count = 0
+                            boss_mad_timer = 60
+                            boss_attack_timer = random.randint(180,300)
+                            bosss.boss_movement_x = 0
+                else:
+                    boss_attack = False
+                    if bosss.boss_x_pos > player_rect.x:
+                        bosss.boss_action, bosss.boss_frame = change_action(bosss.boss_action,bosss.boss_frame, "boss_idle")
+                        bosss.boss_flip = True
+                    elif bosss.boss_x_pos < player_rect.x:
+                        bosss.boss_action, bosss.boss_frame = change_action(bosss.boss_action, bosss.boss_frame,"boss_idle")
+                        bosss.boss_flip = False
+                    boss_attack_timer -=1
+                    if boss_up_down == 0:
+                        bosss.boss_movement_y =-3
+                        if boss_rects.y < 0:
+                            boss_up_down = 1
+                    else:
+                        bosss.boss_movement_y =3
+                        if boss_rects.y > 500:
+                            boss_up_down = 0
+
+
+                bosss.boss_x_pos += bosss.boss_movement_x
+                bosss.boss_y_pos += bosss.boss_movement_y
+                bosss.boss_frame += 1
+                if bosss.boss_frame >= len(animation_database[bosss.boss_action]):
+                    bosss.boss_frame = 0
+                boss_id = animation_database[bosss.boss_action][bosss.boss_frame]
+                boss_img = animation_frames[boss_id]
+                display.blit(pygame.transform.flip(boss_img, bosss.boss_flip, False),(bosss.boss_x_pos - scroll[0], bosss.boss_y_pos - scroll[1]))
+                boss_test_top_left = player_rect.collidepoint(boss_rects.topleft)
+                boss_test_top_right = player_rect.collidepoint(boss_rects.topright)
+                boss_test_left_middle = player_rect.collidepoint(boss_rect1.topleft)
+                boss_test_right_middle = player_rect.collidepoint(boss_rect1.topright)
+
+                boss_test_collider_left1 = player_rect.collidepoint(boss_rect2.midleft)
+                boss_test_collider_left2 = player_rect.collidepoint(boss_rect2.bottomleft)
+                boss_test_collider_left3 = player_rect.collidepoint(boss_rect3.midleft)
+                boss_test_collider_left4 = player_rect.collidepoint(boss_rect3.bottomleft)
+
+                boss_test_collider_right1 = player_rect.collidepoint(boss_rect2.midright)
+                boss_test_collider_right2 = player_rect.collidepoint(boss_rect2.bottomright)
+                boss_test_collider_right3 = player_rect.collidepoint(boss_rect3.midright)
+                boss_test_collider_right4 = player_rect.collidepoint(boss_rect3.bottomright)
+                if boss_attack == False:
+                    if boss_test_top_left == True or boss_test_top_right == True or boss_test_left_middle == True or boss_test_right_middle == True:
+                        bosss.boss_hp -= 1
+                        vertical_momentum = -15
+
+                    if boss_test_collider_left1 == True or boss_test_collider_left2 == True or boss_test_collider_left3 == True or boss_test_collider_left4 == True or boss_test_collider_right1 == True or boss_test_collider_right2 == True or boss_test_collider_right3 == True or boss_test_collider_right4 == True:
+                        player_rect = pygame.Rect(100,300,48,96)
+                        load_map_timer = 0
+                        rudar_sez= []
+                        lučkar_sez =[]
+                        tank_sez = []
+                        coin_sez = []
+                        jump_pad_sez = []
+                        player_score = 0
+                        tile_rects = []
+                        teleport_pad_down_sez = []
+                        teleport_pad_up_sez = []
+                        speed_up_pad_sez = []
+                        boss_sez = []
+                        speed_up_timer = 0
+                        boss_up_down = 0
+                        boss_attack_timer = random.randint(180, 300)
+                        boss_mad_timer = 60
+                        boss_movement_count = 0
+                    if bosss.boss_hp == 0:
+                        bosss.boss_alive = False
+                else:
+                    if player_rect.colliderect(boss_rect4) == True:
+                        player_rect = pygame.Rect(100, 300, 48, 96)
+                        load_map_timer = 0
+                        rudar_sez = []
+                        lučkar_sez = []
+                        tank_sez = []
+                        coin_sez = []
+                        jump_pad_sez = []
+                        player_score = 0
+                        tile_rects = []
+                        teleport_pad_down_sez = []
+                        teleport_pad_up_sez = []
+                        speed_up_pad_sez = []
+                        boss_sez = []
+                        speed_up_timer = 0
+                        boss_up_down = 0
+                        boss_attack_timer = random.randint(180, 300)
+                        boss_mad_timer = 60
+                        boss_movement_count = 0
 
         player_movement = [0,0]
         if moving_right == True:
@@ -636,7 +805,12 @@ def main():
             teleport_pad_down_sez = []
             teleport_pad_up_sez = []
             speed_up_pad_sez = []
+            boss_sez = []
             speed_up_timer = 0
+            boss_up_down = 0
+            boss_attack_timer = random.randint(180, 300)
+            boss_mad_timer = 60
+            boss_movement_count = 0
 
         for event in pygame.event.get(): # event loop
             if event.type == QUIT:
@@ -662,7 +836,7 @@ def main():
         player_jump = False
         #test+=1
 
-        show_score(50,15)
+        show_score(50,10)
         display.blit(coin_img,(5,5))
         screen.blit(pygame.transform.scale(display,WINDOW_SIZE),(0,0))
         pygame.display.update()
